@@ -1,6 +1,15 @@
 package com.example.microservice.jwtAuthorization.jwtController;
 
+import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +28,13 @@ public class JwtContoller {
 	
 	@PostMapping("/user")
 	public ResponseEntity<?> createUser(@RequestBody String user){
-		return null;
+		Map<String , Object> responseBody = new HashMap<String , Object>();
+		JsonReader jsr = Json.createReader(new StringReader(user));
+		JsonObject jso = jsr.readObject();
+		jsr.close();
+		
+		responseBody = jwtService.createOrUpdateUser(jso);
+		return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
 	}
 	
 	@GetMapping("/user")
