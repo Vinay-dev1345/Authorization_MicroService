@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,8 +38,12 @@ public class JwtContoller {
 		return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
 	}
 	
-	@GetMapping("/user")
-	public ResponseEntity<?> checkUserValidity(){
-		return ResponseEntity.ok(null);
+	@GetMapping("/user/{tokenId}")
+	public ResponseEntity<?> checkUserValidity(@PathVariable String tokenId){
+		Map<String , Object> responseBody = new HashMap<String , Object>();
+		
+		Boolean response = jwtService.isValiduser(tokenId);
+		responseBody.put("isValid", response);
+		return ResponseEntity.ok(responseBody);
 	}
 }
