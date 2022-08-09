@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,14 +32,19 @@ public class JwtContoller {
 	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping("/user")
-	public ResponseEntity<?> createUser(@RequestBody String user){
+	public ResponseEntity<?> createUser(@RequestBody String user , HttpServletResponse response){
 		Map<String , Object> responseBody = new HashMap<String , Object>();
 		JsonReader jsr = Json.createReader(new StringReader(user));
 		JsonObject jso = jsr.readObject();
 		jsr.close();
 		
 		responseBody = jwtService.createOrUpdateUser(jso);
-		return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
+		if(!(boolean)responseBody.get("errors")) {
+			return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+		}else {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(responseBody);
+		}
+		
 	}
 	
 	@GetMapping("/user/{tokenId}")

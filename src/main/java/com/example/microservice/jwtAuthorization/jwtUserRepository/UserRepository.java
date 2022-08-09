@@ -14,10 +14,10 @@ import com.example.microservice.jwtAuthorization.jwtUserEntity.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
 	
-	@Query(value="SELECT id FROM userdata WHERE user = ?1", nativeQuery = true)
-	List<String> checkIsUserExistingOrNot(String name);
+	@Query(value="SELECT * FROM userdata WHERE user = ?1", nativeQuery = true)
+	List<User> getCredentialDetails(String name);
 	
 	@Modifying(clearAutomatically=true)
-	@Query(value="UPDATE userdata SET modified_time = ?1 WHERE user = ?2", nativeQuery=true)
-	int updateModifyTimeForUser(String dateModified , String name);
+	@Query(value="UPDATE userdata SET last_update = ?1 WHERE id = ?2", nativeQuery=true)
+	int updateModifyTimeForUser(String dateModified , String userId);
 }

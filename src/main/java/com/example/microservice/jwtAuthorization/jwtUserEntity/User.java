@@ -10,8 +10,8 @@ public class User {
 	@Id
 	private String id;
 	private String user;
-	private String createdTime;
-	private String modifiedTime;
+	private String password;
+	private String lastUpdate;
 
 	public String getId() {
 		return id;
@@ -29,20 +29,20 @@ public class User {
 		this.user = user;
 	}
 
-	public String getCreatedTime() {
-		return createdTime;
+	public String getPassword() {
+		return password;
 	}
 
-	public void setCreatedTime(String createdTime) {
-		this.createdTime = createdTime;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
-	public String getModifiedTime() {
-		return modifiedTime;
+	public String getLastUpdate() {
+		return lastUpdate;
 	}
 
-	public void setModifiedTime(String modifiedTime) {
-		this.modifiedTime = modifiedTime;
+	public void setLastUpdate(String lastUpdate) {
+		this.lastUpdate = lastUpdate;
 	}
 
 }

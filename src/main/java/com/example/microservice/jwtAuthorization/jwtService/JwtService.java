@@ -28,7 +28,7 @@ import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
 public class JwtService {
 	
 	public static final String SECERET_KEY = "secret";
-	
+	public static final int EXPIRATION_TIME_MIN = 30;
 	@Autowired
 	UserRepository userRepository;
 	
@@ -36,72 +36,58 @@ public class JwtService {
 		Map<String, Object> hm = new HashMap<String , Object>();
 		hm.put("userName", name);
 		
-		String token = Jwts.builder().setClaims(hm).signWith(SignatureAlgorithm.HS256, SECERET_KEY).compact();
-		System.out.println(token);
+		String token = Jwts.builder().setClaims(hm).setExpiration(new Date(System.currentTimeMillis() 
+				+ 60 * 1000 * EXPIRATION_TIME_MIN)).signWith(SignatureAlgorithm.HS256, SECERET_KEY).compact();
 		return token;
 	}
 	
-	public Boolean isExistingUser(String userName) {
-		List<String> existingUser = userRepository.checkIsUserExistingOrNot(userName);
+	public String isUserValid(String userName, String password) {
+		String flag = "inValid";
+		List<User> existingUser = userRepository.getCredentialDetails(userName);
 		if(existingUser.isEmpty()) {
-			return false;
-		}else {
-			return true;
+			flag = "inValid";
+		}else{
+			for(int i = 0 ; i < existingUser.size() ; i++) {
+				User user = existingUser.get(i);
+				if(password.equals(user.getPassword())) {
+					flag = user.getId();
+					System.out.println(flag);
+					break;
+				}
+			}
 		}
+		return flag;
+		
 	}
 	
 	public Map<String, Object> createOrUpdateUser(JsonObject jso) {
 		Map<String, Object> response = new HashMap<String , Object>();
-		if(!isExistingUser(jso.getString("userName"))) {
-			try {
-				User user =new User();
-				Date date = new Date();
+		String user = jso.getString("userName");
+		String password = jso.getString("password");
+		
+		try {
+			String userId = isUserValid(user , password);
+			if(!userId.equals("inValid")) {
 				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-				Random ran = new Random();
-				
-				String id = Long.toString(ran.nextLong(10000000 , 99999999));
-				String name = jso.getString("userName");
-				String currentDateTime = sdf.format(date);
-				
-				user.setUser(name);
-				user.setCreatedTime(currentDateTime);
-				user.setModifiedTime(currentDateTime);
-				user.setId(id);
-				
-				userRepository.save(user);
-				String generatedToken = createToken(name);
-				
-				response.put("errors", false);
-				response.put("accessToken", generatedToken);
-				
-			}catch(Exception e) {
-				System.out.println(e.toString());
+			    Date date = new Date();
+			    String currentDateTime = sdf.format(date);
+			    
+			    userRepository.updateModifyTimeForUser(currentDateTime , userId);
+			    
+			    String token = createToken(user);
+			    
+			    response.put("accessToken", token);
+			    response.put("errors" , false);
+			    response.put("errorMsg", "");
+			    
+			}else {
+				response.put("errors" , true);
+			    response.put("errorMsg", "Invalid Credentials");
 			}
+		}catch(Exception e) {
+			response.put("errors" , true);
+		    response.put("errorMsg", "Something went wrong !!!!");
 		}
-		else {
-			try {
-				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-				Date date = new Date();
-				
-				String currentDateTime = sdf.format(date);
-				String userName = jso.getString("userName");
-				
-				int dbResult = userRepository.updateModifyTimeForUser(currentDateTime, userName);
-				if(dbResult > 0) {
-					String generatedToken = createToken(userName);
-					response.put("errors", false);
-					response.put("accessToken", generatedToken);
-				}
-				else {
-					response.put("errors", true);
-				}
-				
-			}catch(Exception e){
-				System.out.println(e.toString());
-			}
-
-		}
-
 		
 		return response;
 	}
