@@ -13,9 +13,12 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.json.JsonObject;
 import javax.xml.bind.DatatypeConverter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.microservice.jwtAuthorization.JwtAuthorizationApplication;
 import com.example.microservice.jwtAuthorization.jwtUserEntity.User;
 import com.example.microservice.jwtAuthorization.jwtUserRepository.UserRepository;
 
@@ -26,7 +29,7 @@ import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
 
 @Service
 public class JwtService {
-	
+	private static Logger logger = LoggerFactory.getLogger(JwtAuthorizationApplication.class);
 	public static final String SECERET_KEY = "secret";
 	public static final int EXPIRATION_TIME_MIN = 30;
 	@Autowired
@@ -38,20 +41,28 @@ public class JwtService {
 		
 		String token = Jwts.builder().setClaims(hm).setExpiration(new Date(System.currentTimeMillis() 
 				+ 60 * 1000 * EXPIRATION_TIME_MIN)).signWith(SignatureAlgorithm.HS256, SECERET_KEY).compact();
+		logger.info("Created JWT Token Successfully");
 		return token;
 	}
 	
 	public String isUserValid(String userName, String password) {
 		String flag = "inValid";
-		List<User> existingUser = userRepository.getCredentialDetails(userName);
+		List<User> existingUser = null;
+		try {
+			existingUser = userRepository.getCredentialDetails(userName);
+		}catch(Exception e) {
+			logger.debug(" Data Extraction from User DataBase Failed ");;
+		}
+		
 		if(existingUser.isEmpty()) {
+			logger.warn("User Not Found");
 			flag = "inValid";
 		}else{
 			for(int i = 0 ; i < existingUser.size() ; i++) {
 				User user = existingUser.get(i);
 				if(password.equals(user.getPassword())) {
 					flag = user.getId();
-					System.out.println(flag);
+					logger.info("User : "+ userName + " Authenticated Sucessfully !!");
 					break;
 				}
 			}
@@ -81,10 +92,12 @@ public class JwtService {
 			    response.put("errorMsg", "");
 			    
 			}else {
+				logger.warn("User " + user + " has provided Invalid Credentials ");
 				response.put("errors" , true);
 			    response.put("errorMsg", "Invalid Credentials");
 			}
 		}catch(Exception e) {
+			logger.debug("UnExpected exception occured ");
 			response.put("errors" , true);
 		    response.put("errorMsg", "Something went wrong !!!!");
 		}
@@ -93,24 +106,28 @@ public class JwtService {
 	}
 	
 	public Boolean isValiduser(String tokenId) {
-		String token = tokenId;
-		String[] tokenBody = token.split("\\.");
-		
-//		Base64.Decoder decoder = Base64.getUrlDecoder();
-//		String header = new String(decoder.decode(tokenBody[0]));
-//		String payload = new String(decoder.decode(tokenBody[1]));
-//		System.out.println(payload);
-//		System.out.println(header);
-		
-		Key secretKeySpecification = new SecretKeySpec(DatatypeConverter.parseBase64Binary(SECERET_KEY) , SignatureAlgorithm.HS256.getJcaName());
-		
-		String tokenWithoutSignature = tokenBody[0] + "." + tokenBody[1];
-		String signatureObtained = tokenBody[2];
-		
-		DefaultJwtSignatureValidator validator = new DefaultJwtSignatureValidator(SignatureAlgorithm.HS256, secretKeySpecification);
-		Boolean value = validator.isValid(tokenWithoutSignature, signatureObtained);
-		
-		System.out.println(value);
+		boolean value = false;
+		try {
+			String token = tokenId;
+			String[] tokenBody = token.split("\\.");
+			
+			Key secretKeySpecification = new SecretKeySpec(DatatypeConverter.parseBase64Binary(SECERET_KEY) , SignatureAlgorithm.HS256.getJcaName());
+			
+			String tokenWithoutSignature = tokenBody[0] + "." + tokenBody[1];
+			String signatureObtained = tokenBody[2];
+			
+			DefaultJwtSignatureValidator validator = new DefaultJwtSignatureValidator(SignatureAlgorithm.HS256, secretKeySpecification);
+			value = validator.isValid(tokenWithoutSignature, signatureObtained);
+			
+			if(value) {
+				logger.info("Token is valid ");
+			}else {
+				logger.warn("Token is Invalid");
+			}
+		}catch(Exception e) {
+			logger.debug("Unexpected execption occured while processing token");
+		}
+
 		return value;
 	}
 	
