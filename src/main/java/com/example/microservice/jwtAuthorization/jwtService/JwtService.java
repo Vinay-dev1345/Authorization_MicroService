@@ -98,6 +98,7 @@ public class JwtService {
 			}
 		}catch(Exception e) {
 			logger.debug("UnExpected exception occured ");
+			System.out.println(e.toString());
 			response.put("errors" , true);
 		    response.put("errorMsg", "Something went wrong !!!!");
 		}
