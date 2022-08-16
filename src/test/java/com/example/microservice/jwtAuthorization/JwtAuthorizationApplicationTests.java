@@ -15,17 +15,23 @@ import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
+import com.example.microservice.jwtAuthorization.jwtController.JwtContoller;
 import com.example.microservice.jwtAuthorization.jwtService.JwtService;
 import com.example.microservice.jwtAuthorization.jwtUserEntity.User;
 import com.example.microservice.jwtAuthorization.jwtUserRepository.UserRepository;
@@ -40,8 +46,14 @@ class JwtAuthorizationApplicationTests {
 	@Mock
 	JsonObject jso;
 	
+	@Mock
+	private JwtService jwtServiceMock;
+	
 	@InjectMocks
 	private JwtService jwtService;
+	
+	@InjectMocks
+	private JwtContoller jwtController;
 	
 	@Test
 	public void checkWhetherTokenCanBeCreatedOrNot() {
@@ -123,6 +135,24 @@ class JwtAuthorizationApplicationTests {
 		System.out.println(actualResponse);
 		Assertions.assertEquals(actualResponse.get("errors"), true);
 		
+	}
+	
+	@Test
+	public void verifyJWTControllerForcheckUserValidityFunction() {
+		when(jwtServiceMock.isValiduser("user")).thenReturn(true);
+		ResponseEntity<?> actualResponse = jwtController.checkUserValidity("user");
+		Assertions.assertEquals(200, actualResponse.getStatusCodeValue());
+	}
+	
+	@Disabled("issue")
+	@Test
+	public void verifyJWTControllerForcreateUserFunction() {
+		Map<String , Object> sampleResponse = new HashMap<String , Object>();
+		sampleResponse.put("errors" , false);
+		sampleResponse.put("accessToken", "sampleToken");
+		
+		ResponseEntity<?> actualResponse = jwtController.createUser("{\"userName\":\"jane\",\"password\":\"jane@123\"}", null);
+		Assertions.assertEquals(200, actualResponse.getStatusCodeValue());
 	}
 	
 
