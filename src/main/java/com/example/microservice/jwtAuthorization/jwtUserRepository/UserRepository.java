@@ -14,7 +14,7 @@ import com.example.microservice.jwtAuthorization.jwtUserEntity.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
 	
-	@Query(value="SELECT * FROM userdata WHERE user = ?1", nativeQuery = true)
+	@Query(value="SELECT * FROM userdata WHERE username = ?1", nativeQuery = true)
 	List<User> getCredentialDetails(String name);
 	
 	@Modifying(clearAutomatically=true)
