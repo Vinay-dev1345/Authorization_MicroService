@@ -66,7 +66,7 @@ class JwtAuthorizationApplicationTests {
 	@Test
 	public void checkWhetherTokenIsValid() {
 		boolean expected = true;
-		String sampleToken = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyTmFtZSI6ImphbmUiLCJleHAiOjE2NjA1NjQxMTF9.J0HiZ8Ri88XSuVqNyBgr0hF4zNDpvcesXnQX3ydocws";
+		String sampleToken = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyTmFtZSI6InNtaXRoIiwiZXhwIjoxNjYwODQ2MTk4fQ.pTw6S_hvkZgyEev-n9C36Twk7nyw6TicVnOeFtV0ZWQ";
 		boolean actual = jwtService.isValiduser(sampleToken);
 		Assertions.assertEquals(expected,actual);
 	}
