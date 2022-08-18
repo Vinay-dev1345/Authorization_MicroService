@@ -30,8 +30,8 @@ import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
 @Service
 public class JwtService {
 	private static Logger logger = LoggerFactory.getLogger(JwtAuthorizationApplication.class);
-	public static final String SECERET_KEY = "secret";
-	public static final int EXPIRATION_TIME_MIN = 30;
+	public static final String SECERET_KEY = "4A9TYU6J9OP1BN578LIQ29JN03BD2LZ1";
+	public static final int EXPIRATION_TIME_MIN = 5;
 	@Autowired
 	UserRepository userRepository;
 	

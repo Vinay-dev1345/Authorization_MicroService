@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,8 +37,8 @@ public class JwtContoller {
 	JwtService jwtService;
 	
 	@CrossOrigin(origins = "*")
-	@PostMapping("/user")
-	public ResponseEntity<?> createUser(@RequestBody String user , HttpServletResponse response){
+	@PostMapping(value = "/user" , produces = {MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<?> createUser(@RequestBody String user , HttpServletResponse response ){
 		Map<String , Object> responseBody = new HashMap<String , Object>();
 		JsonReader jsr = Json.createReader(new StringReader(user));
 		JsonObject jso = jsr.readObject();
@@ -55,7 +56,7 @@ public class JwtContoller {
 		
 	}
 	
-	@GetMapping("/user/{tokenId}")
+	@GetMapping(value = "/user/{tokenId}", produces= {MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<?> checkUserValidity(@PathVariable String tokenId){
 		Map<String , Object> responseBody = new HashMap<String , Object>();
 		
